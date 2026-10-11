@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Husey — Security Researcher</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --base:     #0a0a0f;
+    --surface:  #111118;
+    --surface2: #1a1a2e;
+    --border:   #ffffff10;
+    --green:    #00ff88;
+    --violet:   #7b61ff;
+    --text:     #e2e8f0;
+    --muted:    #6b7280;
+    --danger:   #ff4466;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--base);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+    height: 60px;
+    background: #0a0a0fee;
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--green);
+    letter-spacing: -0.5px;
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--green); }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 80px 48px 0;
+    gap: 48px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero-left { max-width: 560px; }
+
+  .hero-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hero-tag::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .hero-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(52px, 7vw, 96px);
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -3px;
+    color: #fff;
+    margin-bottom: 24px;
+  }
+
+  .hero-name span { color: var(--green); }
+
+  .hero-desc {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 420px;
+    line-height: 1.7;
+    margin-bottom: 40px;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    padding: 12px 28px;
+    background: var(--green);
+    color: #000;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+
+  .btn-primary:hover { opacity: 0.85; }
+
+  .btn-ghost {
+    padding: 12px 28px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .btn-ghost:hover { border-color: var(--violet); color: var(--violet); }
+
+  /* Hero right — stat block */
+  .hero-right {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-left: 1px solid var(--border);
+    padding-left: 48px;
+  }
+
+  .stat-item {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .stat-item:last-child { border-bottom: none; }
+
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .stat-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--green);
+  }
+
+  /* ── SECTION COMMON ── */
+  section { padding: 96px 48px; border-bottom: 1px solid var(--border); }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 56px;
+  }
+
+  .section-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: #fff;
+  }
+
+  .section-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--violet);
+  }
+
+  /* ── TOOLS GRID ── */
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .tool-card {
+    background: var(--surface);
+    padding: 32px;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tool-card:hover { background: var(--surface2); }
+
+  .tool-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--green);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .tool-card:hover::before { opacity: 1; }
+
+  .tool-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--violet);
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+  }
+
+  .tool-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+
+  .tool-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .tool-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    background: var(--border);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .tag-green { border-color: #00ff8840; color: var(--green); background: #00ff8808; }
+  .tag-violet { border-color: #7b61ff40; color: var(--violet); background: #7b61ff08; }
+  .tag-red { border-color: #ff446640; color: var(--danger); background: #ff446608; }
+
+  /* ── PROJECTS / RESEARCH ── */
+  .projects-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); }
+
+  .project-row {
+    background: var(--surface);
+    padding: 28px 32px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 24px;
+    transition: background 0.2s;
+    cursor: default;
+  }
+
+  .project-row:hover { background: var(--surface2); }
+
+  .project-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+
+  .project-desc {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .project-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 4px 10px;
+    white-space: nowrap;
+  }
+
+  .status-active { color: var(--green); border: 1px solid #00ff8840; background: #00ff8808; }
+  .status-wip    { color: #fbbf24;      border: 1px solid #fbbf2440; background: #fbbf2408; }
+  .status-done   { color: var(--muted); border: 1px solid var(--border); }
+
+  /* ── DATA / LEAKS SECTION ── */
+  .data-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+
+  .data-desc {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 24px;
+  }
+
+  .data-warning {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--danger);
+    padding: 12px 16px;
+    border: 1px solid #ff446630;
+    background: #ff446608;
+    margin-top: 16px;
+  }
+
+  .data-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .data-stat {
+    background: var(--surface);
+    padding: 24px;
+  }
+
+  .data-stat-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--danger);
+    margin-bottom: 4px;
+  }
+
+  .data-stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* ── DISCORD TOOLS ── */
+  .discord-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .discord-card {
+    background: var(--surface);
+    padding: 28px;
+    transition: background 0.2s;
+  }
+
+  .discord-card:hover { background: var(--surface2); }
+
+  .discord-icon {
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+
+  .discord-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+
+  .discord-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── CONTACT ── */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+
+  .contact-text {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 700;
+    letter-spacing: -1.5px;
+    color: #fff;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+
+  .contact-text span { color: var(--green); }
+
+  .contact-sub {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .contact-link {
+    background: var(--surface);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-decoration: none;
+    color: var(--text);
+    transition: background 0.2s;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+  }
+
+  .contact-link:hover { background: var(--surface2); color: var(--green); }
+
+  .contact-link-arrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    transition: color 0.2s;
+  }
+
+  .contact-link:hover .contact-link-arrow { color: var(--green); }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 32px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    color: var(--green);
+    font-size: 14px;
+  }
+
+  .footer-copy {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* ── TERMINAL LINE EFFECT ── */
+  .terminal-line {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--green);
+    margin-bottom: 8px;
+    opacity: 0.6;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    #hero { grid-template-columns: 1fr; padding: 100px 20px 40px; }
+    .hero-right { border-left: none; border-top: 1px solid var(--border); padding-left: 0; padding-top: 32px; }
+    section { padding: 64px 20px; }
+    .data-section { grid-template-columns: 1fr; }
+    .contact-grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 8px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">HUSEY</a>
+  <ul class="nav-links">
+    <li><a href="#tools">Tools</a></li>
+    <li><a href="#projects">Projets</a></li>
+    <li><a href="#data">Data</a></li>
+    <li><a href="#discord">Discord</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-left">
+    <div class="hero-tag">Security Researcher — actif</div>
+    <h1 class="hero-name">HU<span>SE</span>Y</h1>
+    <p class="hero-desc">
+      Développeur de tools offensifs et défensifs. Recherche en cybersécurité, 
+      analyse de données, automatisation et outils Discord. 
+      Je construis ce dont j'ai besoin — et je le partage.
+    </p>
+    <div class="hero-cta">
+      <a href="#tools" class="btn-primary">Voir les tools</a>
+      <a href="#contact" class="btn-ghost">Me contacter</a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="stat-item">
+      <span class="stat-label">TOOLS DÉVELOPPÉS</span>
+      <span class="stat-value">20+</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">LANGAGES</span>
+      <span class="stat-value">5</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">PROJETS ACTIFS</span>
+      <span class="stat-value">8</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">FOCUS</span>
+      <span class="stat-value" style="font-size:16px; letter-spacing: -0.5px;">OSINT / RECON</span>
+    </div>
+  </div>
+</section>
+
+<!-- TOOLS -->
+<section id="tools">
+  <div class="section-header">
+    <h2 class="section-title">Tools</h2>
+    <span class="section-count">// développement perso</span>
+  </div>
+
+  <div class="tools-grid">
+
+    <div class="tool-card">
+      <div class="tool-lang">PYTHON</div>
+      <div class="tool-name">Name Checker</div>
+      <div class="tool-desc">Vérifie la disponibilité d'un username sur des dizaines de plateformes simultanément. Multi-thread, export JSON/CSV, proxy support.</div>
+      <div class="tool-tags">
+        <span class="tag tag-green">OSINT</span>
+        <span class="tag tag-violet">async</span>
+        <span class="tag">requests</span>
+      </div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-lang">PYTHON</div>
+      <div class="tool-name">Discord Token Checker</div>
+      <div class="tool-desc">Validation de tokens Discord en masse. Détecte le statut, les informations de compte, les boosts Nitro. Rate-limit aware.</div>
+      <div class="tool-tags">
+        <span class="tag tag-green">Discord</span>
+        <span class="tag">aiohttp</span>
+        <span class="tag tag-violet">bulk</span>
+      </div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-lang">PYTHON</div>
+      <div class="tool-name">Database Parser</div>
+      <div class="tool-desc">Analyse et normalise des dumps de bases de données de différents formats. Extraction, déduplication, export structuré.</div>
+      <div class="tool-tags">
+        <span class="tag tag-red">DATA</span>
+        <span class="tag">pandas</span>
+        <span class="tag">sqlite3</span>
+      </div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-lang">PYTHON</div>
+      <div class="tool-name">Credential Sorter</div>
+      <div class="tool-desc">Trie et classe des listes de credentials (email:pass, user:pass) par domaine, format, et validité. Pipeline de nettoyage complet.</div>
+      <div class="tool-tags">
+        <span class="tag tag-red">RECON</span>
+        <span class="tag">regex</span>
+        <span class="tag tag-violet">pipeline</span>
+      </div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-lang">PYTHON / JAVA</div>
+      <div class="tool-name">Port Scanner Pro</div>
+      <div class="tool-desc">Scanner de ports multi-thread avec banner grabbing, détection de services, et intégration Shodan. Output Nmap-compatible.</div>
+      <div class="tool-tags">
+        <span class="tag tag-green">NETWORK</span>
+        <span class="tag">socket</span>
+        <span class="tag tag-violet">threading</span>
+      </div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-lang">JAVA</div>
+      <div class="tool-name">APK Analyzer</div>
+      <div class="tool-desc">Décompile et analyse les APKs Android. Extraction de strings, détection de hardcoded keys, cartographie des permissions.</div>
+      <div class="tool-tags">
+        <span class="tag tag-red">MOBILE</span>
+        <span class="tag">apktool</span>
+        <span class="tag">jadx</span>
+      </div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-lang">PYTHON</div>
+      <div class="tool-name">OSINT Aggregator</div>
+      <div class="tool-desc">Agrège les résultats de multiples sources OSINT sur une cible (domaine, email, username). Rapport HTML auto-généré.</div>
+      <div class="tool-tags">
+        <span class="tag tag-green">OSINT</span>
+        <span class="tag">Shodan</span>
+        <span class="tag">WHOIS</span>
+      </div>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-lang">PYTHON</div>
+      <div class="tool-name">Proxy Scraper & Checker</div>
+      <div class="tool-desc">Scrape des listes de proxies publics, les teste en temps réel et maintient un pool valide avec rotation automatique.</div>
+      <div class="tool-tags">
+        <span class="tag tag-violet">proxy</span>
+        <span class="tag">aiohttp</span>
+        <span class="tag">async</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PROJETS -->
+<section id="projects">
+  <div class="section-header">
+    <h2 class="section-title">Projets</h2>
+    <span class="section-count">// recherche & dev</span>
+  </div>
+
+  <div class="projects-list">
+
+    <div class="project-row">
+      <div>
+        <div class="project-name">SentinelScan — Framework de recon automatisé</div>
+        <div class="project-desc">Pipeline complet : discovery → enumeration → reporting. Modulaire, extensible, CLI + API REST.</div>
+      </div>
+      <span class="project-status status-active">ACTIF</span>
+    </div>
+
+    <div class="project-row">
+      <div>
+        <div class="project-name">LeakWatch — Monitor de nouvelles fuites</div>
+        <div class="project-desc">Surveille les sources de leaks publics et notifie en temps réel via Discord webhook. Parsing multi-format.</div>
+      </div>
+      <span class="project-status status-active">ACTIF</span>
+    </div>
+
+    <div class="project-row">
+      <div>
+        <div class="project-name">DiscordRaid Defense Analyzer</div>
+        <div class="project-desc">Analyse les patterns d'attaque sur serveurs Discord. Détection de raids, compte-rendu pour admins.</div>
+      </div>
+      <span class="project-status status-wip">EN COURS</span>
+    </div>
+
+    <div class="project-row">
+      <div>
+        <div class="project-name">MassValidator — Validation de données en masse</div>
+        <div class="project-desc">Valide des datasets entiers (emails, phones, usernames) via APIs publiques. 10k+ entrées/minute.</div>
+      </div>
+      <span class="project-status status-wip">EN COURS</span>
+    </div>
+
+    <div class="project-row">
+      <div>
+        <div class="project-name">Android Mod Framework (Frida-based)</div>
+        <div class="project-desc">Framework d'injection Frida pour Android. Auto-attach, overlay flottant, hook library réutilisable.</div>
+      </div>
+      <span class="project-status status-done">PAUSÉ</span>
+    </div>
+
+    <div class="project-row">
+      <div>
+        <div class="project-name">Stealth Logger — Audit d'activité système</div>
+        <div class="project-desc">Capture et log l'activité système (inputs, process, réseau) pour audit forensique. Chiffrement AES-256.</div>
+      </div>
+      <span class="project-status status-done">TERMINÉ</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- DATA / LEAKS -->
+<section id="data">
+  <div class="section-header">
+    <h2 class="section-title">Data Research</h2>
+    <span class="section-count">// leaks & bases de données</span>
+  </div>
+
+  <div class="data-section">
+    <div>
+      <div class="terminal-line">$ cat about_data.txt</div>
+      <p class="data-desc">
+        Je travaille sur la collecte, l'analyse et la publication de données issues de fuites 
+        de sécurité publiques et de bases de données. Ce travail inclut la recherche de nouveaux 
+        leaks, leur parsing, leur normalisation, et leur redistribution dans des formats exploitables.
+      </p>
+      <p class="data-desc">
+        Je produis également mes propres fichiers de données : listes compilées, bases enrichies, 
+        exports structurés issus de sources ouvertes (OSINT). Chaque fichier est documenté avec 
+        sa source, son format et sa date de collecte.
+      </p>
+      <p class="data-desc">
+        L'objectif est la recherche, la documentation et la compréhension de la surface d'exposition 
+        des données personnelles sur internet.
+      </p>
+      <div class="data-warning">
+        ⚠ Contenu réservé à la recherche en sécurité
+      </div>
+    </div>
+
+    <div>
+      <div class="terminal-line">$ stats --data</div>
+      <div class="data-stats">
+        <div class="data-stat">
+          <div class="data-stat-value">50+</div>
+          <div class="data-stat-label">BASES ANALYSÉES</div>
+        </div>
+        <div class="data-stat">
+          <div class="data-stat-value">12</div>
+          <div class="data-stat-label">FICHIERS PUBLIÉS</div>
+        </div>
+        <div class="data-stat">
+          <div class="data-stat-value">8</div>
+          <div class="data-stat-label">FORMATS SUPPORTÉS</div>
+        </div>
+        <div class="data-stat">
+          <div class="data-stat-value">∞</div>
+          <div class="data-stat-label">SOURCES SURVEILLÉES</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DISCORD TOOLS -->
+<section id="discord">
+  <div class="section-header">
+    <h2 class="section-title">Discord Tools</h2>
+    <span class="section-count">// bots & utilities</span>
+  </div>
+
+  <div class="discord-grid">
+
+    <div class="discord-card">
+      <div class="discord-icon">🔍</div>
+      <div class="discord-name">Token Checker</div>
+      <div class="discord-desc">Vérification de tokens Discord en masse. Statut, Nitro, âge du compte, flags. Export CSV.</div>
+    </div>
+
+    <div class="discord-card">
+      <div class="discord-icon">📋</div>
+      <div class="discord-name">Server Cloner</div>
+      <div class="discord-desc">Clone la structure complète d'un serveur Discord : channels, rôles, permissions, emojis.</div>
+    </div>
+
+    <div class="discord-card">
+      <div class="discord-icon">🛡️</div>
+      <div class="discord-name">Raid Detector Bot</div>
+      <div class="discord-desc">Détecte les patterns de raid en temps réel. Auto-lock, alertes admin, log forensique.</div>
+    </div>
+
+    <div class="discord-card">
+      <div class="discord-icon">📨</div>
+      <div class="discord-name">Mass DM Tool</div>
+      <div class="discord-desc">Envoi de messages en masse sur Discord avec gestion du rate-limit et rotation de tokens.</div>
+    </div>
+
+    <div class="discord-card">
+      <div class="discord-icon">👤</div>
+      <div class="discord-name">Member Scraper</div>
+      <div class="discord-desc">Extraction des membres d'un serveur avec metadata : username, ID, rôles, date de join.</div>
+    </div>
+
+    <div class="discord-card">
+      <div class="discord-icon">⚡</div>
+      <div class="discord-name">Webhook Spammer</div>
+      <div class="discord-desc">Outil de test de charge sur webhooks Discord. Utile pour les tests de résistance de serveurs.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-grid">
+    <div>
+      <h2 class="contact-text">Travaillons<br><span>ensemble.</span></h2>
+      <p class="contact-sub">
+        Collaboration, questions, échanges sur des projets communs. 
+        Je réponds aux demandes sérieuses.
+      </p>
+    </div>
+
+    <div class="contact-links">
+      <a href="https://discord.gg/HnsaQgzqaN" target="_blank" rel="noopener" class="contact-link">
+        <span>Discord</span>
+        <span class="contact-link-arrow">→</span>
+      </a>
+      <a href="https://t.me/Husey21" target="_blank" rel="noopener" class="contact-link">
+        <span>Telegram</span>
+        <span class="contact-link-arrow">→</span>
+      </a>
+      <a href="https://github.com/Husey21" target="_blank" rel="noopener" class="contact-link">
+        <span>GitHub</span>
+        <span class="contact-link-arrow">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-name">HUSEY</span>
+  <span class="footer-copy">// Security Researcher — 2025</span>
+</footer>
+
+</body>
+</html>
